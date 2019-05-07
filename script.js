@@ -1,3 +1,8 @@
 
+initApp();
 
-console.log("Hello from script");
+function ObjectValues(object) {
+    return Object.keys(object).map(function (key) {
+        return object[key];
+    });
+}
