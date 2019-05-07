@@ -171,10 +171,6 @@ ViewsControl.prototype.update = function () {
     }
 }
 
-// This Control is more complicated, and handles the creation of other Controls.
-function DrawerControl(app) {
-    this._app = app;
-}
 
 // Close the drawer
 DrawerControl.prototype.close = function () {
