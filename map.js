@@ -140,3 +140,263 @@ function addLayers(map, filters) {
         }
     });
 }
+
+
+
+
+
+
+
+
+function mapInteractions(map, filters) {
+    // The devlopment that we're highlighting right now
+    var highlightedDevelopmentKey = null;
+
+    // The map's display canvas style properties
+    var mapStyle = map.getCanvas().style;
+
+    // How tall our search area for features will be. Currently it's set to the height of the map
+    var searchHeight = map.painter.height;
+
+    // Get the wand and hide it for now
+    var wand = d3.select(".wand").style("opacity", 0);
+
+    map.on("mousemove", function (e) {
+        // Find the development that we're mousing over
+        var developmentKey = findBuilding(e.point, searchHeight);
+
+        // If we have a development and it's not the one that's currently highlighted
+        if (developmentKey && developmentKey !== highlightedDevelopmentKey) {
+            // Save it
+            highlightedDevelopmentKey = developmentKey;
+
+            // Get the features around this development
+            var features = getFeaturesAroundMouse(e.point, searchHeight, developmentKey);
+
+            // Do something with these features
+            highlightOn(features);
+
+            // Place the wand at the center of mass of these features
+            var featuresCenter = map.project(turf.centerOfMass(turf.featureCollection(features)).geometry.coordinates)
+            wand.style("transform", "translate(-50%, 0px) translate(" + featuresCenter.x + "px," + featuresCenter.y + "px)");
+
+        } else if (highlightedDevelopmentKey && developmentKey === null) {
+            // If we have a currently highlighted development and there's none under the cursor, we'll clear it and unhighlight the current one.
+            // This means that we're only doing work when the development key has changed, rather than when the mouse has moved.
+            highlightedDevelopmentKey = null;
+            highlightOff();
+        }
+    });
+
+    map.on("click", function (e) {
+        // Since a click will follow a previous mousemove, we can use the highlighted development key without having to look around again.
+        if (highlightedDevelopmentKey) {
+            // We get the features around the mouse
+            var features = getFeaturesAroundMouse(e.point, searchHeight, highlightedDevelopmentKey);
+
+            // If there are some
+            if (features.length) {
+                // Place a popup at the center of mass
+                popupCoords = turf.centerOfMass(turf.featureCollection(features)).geometry.coordinates;
+
+                app.popup = new mapboxgl.Popup({
+                        anchor: "top"
+                    })
+                    .setLngLat(popupCoords)
+                    .setHTML(generatePopupHTML(features[0]))
+                    .addTo(map);
+
+                // Get the development status (first feature is fine, since they should all have the same status)
+                var status = features[0].properties.status;
+
+                d3.selectAll(".mapboxgl-popup-content")
+                    // Set the colour according to the status
+                    .style("border-color", getColourForStatus(status))
+                    .style("border-width", 6)
+                    .style("border-style", "solid")
+                    .style("border-radius", "10px");
+
+                d3.selectAll(".mapboxgl-popup-tip")
+                    .style("border-bottom-color", getColourForStatus(status));
+
+                // We match the development status to the keys in app.filter, like app.filter.CONSTRUCTED
+                function getColourForStatus(status) {
+                    return filters[status].colour;
+                }
+
+                // Hide the wand when we open a popup.
+                d3.select(".wand").text("").style("opacity", 0);
+
+                // Move the map to center the popup. We could also flyTo with a zoom if we wanted a zoom-in effect.
+                map.easeTo({
+                    center: popupCoords,
+                });
+            }
+        }
+
+    });
+
+    // Generate popup HTML from feature properties
+    function generatePopupHTML(feature) {
+        var element = document.createElement("div");
+
+        var div = d3.select(element);
+
+        div.append("div")
+            .attr("class", "popup-title")
+            .text(feature.properties.call_out_line_1a);
+
+        var table = div.append("table")
+            .attr("class", "popup-table");
+
+        var status = table.append("tr");
+        status.append("th").text("Status");
+        status.append("td").text(feature.properties.status);
+
+        var application = table.append("tr");
+        application.append("th").text("Town Planning Application");
+        application.append("td").text(feature.properties.call_out_line_2a);
+
+        // Check with .toUpperCase() just to be sure we're not checking "na" against "NA"
+        if (feature.properties.call_out_line_3a.toUpperCase() !== "NA") {
+            var line3 = table.append("tr");
+            line3.append("th").text(feature.properties.call_out_line_3a);
+            line3.append("td").text(feature.properties.call_out_line_3b);
+        }
+
+        if (feature.properties.call_out_line_4a.toUpperCase() != "NA") {
+            var line4 = table.append("tr");
+            line4.append("th").text(feature.properties.call_out_line_4a);
+            line4.append("td").text(feature.properties.call_out_line_4b);
+        }
+
+        if (feature.properties.call_out_line_5a.toUpperCase() != "NA") {
+            var line5 = table.append("tr");
+            line5.append("th").text(feature.properties.call_out_line_5a);
+            line5.append("td").text(feature.properties.call_out_line_5b);
+        }
+
+        return element.innerHTML;
+    }
+
+    // For highlighting features
+    function highlightOn(features) {
+        // Set the highlight source data to the features we want to highlight
+        map.getSource("highlight").setData({
+            type: "FeatureCollection",
+            features: features,
+        });
+
+        // Make it obvious to the user that they can click
+        mapStyle.cursor = "pointer";
+
+        // Set the wand to display the address
+        d3.select(".wand").text(features[0].properties.call_out_line_1a).style("opacity", 0.9);
+    }
+
+    // For unhighlighting features
+    function highlightOff() {
+        // Set the highlight source data to be empty
+        map.getSource("highlight").setData(turf.featureCollection([]));
+
+        // Unset mouse cursor
+        mapStyle.cursor = "";
+
+        // Hide the wand
+        d3.select(".wand").text("").style("opacity", 0);
+    }
+
+    function getFeaturesAroundMouse(point, searchHeight, developmentKey) {
+        // Since we're querying for rendered features, we can just state that we want everything that's not constructed.
+        // It might be better to invert the filter or explicitly link it to the current filter
+        var filter = [
+            "all", ["in", "status", "UNDER CONSTRUCTION", "APPROVED", "APPLIED"]
+        ];
+
+        // If we supply a developmentKey to this function, we want to look in the same area, but we only want the one development
+        if (developmentKey) {
+            filter.push(["==", "development_key", developmentKey]);
+        }
+
+        // Search around the mouse
+        var offsetPointSW = new Array(point.x - 5, searchHeight + 200);
+        var offsetPointNE = new Array(point.x + 5, point.y);
+        var srchbbox = new Array(offsetPointSW, offsetPointNE);
+
+        // Return an array of features
+        return map.queryRenderedFeatures(srchbbox, {
+            layers: [buildingsLayerID],
+            filter: filter,
+        });
+    }
+
+    // Find the building that the user is most likely mousing over
+    // This algorithm doesn't account for the changes in pitch that occur at the top and bottom of the map,
+    // or the non-orthogonal nature of the map. But it sort of works. ¯\_⌒_(ツ)_⌒_/¯
+    function findBuilding(point, searchHeight) {
+        // Get a bunch of features around the map, without a set developmentKey
+        var features = getFeaturesAroundMouse(point, searchHeight);
+
+        // If we can't find anything, oh well
+        if (!features.length) return null;
+
+        // For all the developments that we do find, group them under their development_key
+        var developments = d3.nest()
+            .key(function (d) {
+                return d.properties.development_key;
+            })
+            .entries(features);
+
+        // The most likely candidate that we're looking at
+        var mostVisibleFeatureDevelopmentKey = null;
+
+        // A building height to distance from mouse ratio
+        var biggestRatio = 0;
+
+        // A GeoJSON point of where the mouse is
+        var mousePoint = lngLatToTurfPoint(map.unproject(point));
+
+        // Get the pitch of the map. To make sure we don't divide by 0, clamp it to an epsilon value
+        var pitch = degreeToRadian(Math.max(map.getPitch(), 0.1));
+
+        // We're going to look through each group of developments
+        developments.forEach(function (development) {
+            // Create a featureCollection for this development
+            var developmentCollection = turf.featureCollection(development.values);
+
+            // Get the surrounding envelope for this development featureCollection
+            var envelope = turf.envelope(developmentCollection);
+
+            // Find the tallest building in this development featureCollection (with some added fudge)
+            var tallestExtrusion = d3.max(development.values.map(function (value) {
+                // It seems to help to have a min height (for now, 40) and also some extra height on the existing buildings.
+                // If you want to tweak the hacky algorithm you can play with these values.
+                return Math.max(value.properties.extrusion * 1.05, 40);
+            }));
+
+            // Get the center point of the development
+            var developmentCentroid = turf.centroid(envelope);
+
+            // Get the distance, in meters, between the mouse and the center of the development
+            var distanceBetweenMouseAndTallestDevelopment = turf.distance(developmentCentroid, mousePoint) * 1000;
+
+            // tan(pitch) = height / distance
+            // height = distance * tan(pitch)
+            var perspectiveHeight = tallestExtrusion * Math.tan(pitch);
+
+            // Get a ratio between to find the tallest-looking structure from the users perspective
+            var perspectiveDistance = distanceBetweenMouseAndTallestDevelopment * Math.atan(pitch);
+            var ratio = perspectiveDistance / perspectiveHeight;
+
+            // When this ratio is above 1 then the mouse should be above the building
+            // If this is the best ratio that we've found, save it
+            if (ratio <= 1 && ratio > biggestRatio) {
+                biggestRatio = ratio;
+                mostVisibleFeatureDevelopmentKey = development.key;
+            }
+        });
+
+        // Return the most likely development key
+        return mostVisibleFeatureDevelopmentKey;
+    }
+}
