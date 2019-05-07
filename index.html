@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Development Activity Model</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1,maximum-scale=1,user-scalable=no">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="city_of_melbourne.ico" />
+
+  <!-- jQuery (Bootstrap dependency) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+
+  <!-- Turf -->
+  <script src='https://npmcdn.com/@turf/turf@4.7.3/turf.js'></script>
+
+  <!-- Mapbox -->
+  <!-- Mapbox GL -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Mapbox Geocoder -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.0.1/mapbox-gl-geocoder.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.0.1/mapbox-gl-geocoder.css" type="text/css" />
+
+  <!-- Application styles -->
+  <link href="style.css" rel="stylesheet" />
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-10567768-26', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</head>
+
+<body>
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h3 class="modal-title" id="myModalLabel">Development Activity Model</h3>
+        </div>
+        <div class="modal-body" style="max-height: calc(100vh - 200px);overflow-y: scroll;">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Welcome</a></li>
+            <li role="presentation"><a href="#howto" aria-controls="profile" role="tab" data-toggle="tab">How To</a></li>
+            <li role="presentation"><a href="#use" aria-controls="profile" role="tab" data-toggle="tab">Content and Disclaimer</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <section role="tabpanel" class="tab-pane active" id="home">
+              <h4>About the Development Activity Model</h4>
+              <p>Welcome to City of Melbourne's 3D Development Activity Model (3D DAM). This provides a representation of major development activity in the Melbourne Local Government Area. The visualisation is underpinned by information from the City of Melbourne Planning systems.</p>
+			  <p>All 3D Models are simplified interpretations of complex built forms and should not be used for planning purposes.</p>
+			  <p>Data for the 3D Development Activity Model can be found on the City of Melbourne open data platform:</p>
+			  <ul>
+				<li><a href="https://data.melbourne.vic.gov.au/Property-Planning/3D-Development-Activity-Model/def8-4wbt" target="_blank">3D DAM spatial data</a></li>
+				<li><a href="https://data.melbourne.vic.gov.au/Property-Planning/Major-development-projects-Development-Activity-Mo/gh7s-qda8" target="_blank">Tabular data</a></li>
+			  </ul>
+			  <p>Any questions, comments or suggestions relating to this site please <a href="mailto:gisfeedback@melbourne.vic.gov.au?subject=3D DAM"">contact us</a>.</p>
+
+		  </section>
+		  
+            <section role="tabpanel" class="tab-pane" id="howto">
+			  <h4>How to use</h4>
+			 <table class="table table-bordered">
+
+				<tbody>
+
+                  <tr class="visible-lg">
+                    <td style="width: 40%;">
+						<ol>
+							<li>Hold and Right click to swivel</li>
+							<li>Hold left click to pan</li>
+							<li>Use the scroll wheel to zoom</li>
+						</ol>
+					</td>
+                    <td style="width: 60%;">
+						<img src="mouseTutorial.jpg" alt="How to use" width="100%">
+                    </td>
+                  </tr>
+
+                  <tr>
+					<td>Click on each coloured building to see key information about it.</td>
+                    <td>
+						<img src="keyInformation.jpg" alt="Getting building information" width="100%">
+                    </td>
+                  </tr>
+				  
+			     <tr>
+					<td>
+						Click on the buttons to the left to turn layers on and off.
+						<ol>
+							<li>Under construction means the building is under construction.</li>
+							<li>Approved means the development has town planning approval.</li>
+							<li>Applied means there is a town planning application which is yet to be approved.</li>
+						</ol>
+					</td>
+                    <td>
+						<img src="buttons.jpg" alt="Buttons" width="100%">
+                    </td>
+                  </tr>
+				  
+				  <tr>
+					<td>
+						Click on the magnifying glass to search for an address or location.
+					</td>
+                    <td>
+						<img src="search.jpg" alt="Search" width="100%">
+                    </td>
+                  </tr>
+				  
+				  <tr>
+					<td>
+						Click on the eye to explore pre-determined views.
+					</td>
+                    <td>
+						<img src="views.jpg" alt="Search" width="100%">
+                    </td>
+                  </tr>
+				  
+				  <tr>
+					<td>
+						Click on the information button to return to the help section and disclaimer
+					</td>
+                    <td>
+						<img src="helpSection.jpg" alt="Search" width="100%">
+                    </td>
+                  </tr>
+
+
+
+                </tbody>
+              </table>
+			  
+			  
+            </section>
+
+            <section role="tabpanel" class="tab-pane" id="use">
+              <h4>Use and Content Information</h4>
+
+              <p>The site content includes information about development activity located within the City of Melbourne municipal
+                area. Developments may have one of three statuses with a different colour for each status. Applied (blue),
+                Approved (green) and Under Construction (yellow).</p>
+              <p>Site content is derived from a range of sources at various times and as such the content may not be free from
+                errors, omissions or defects. Inconsistencies may occur in some data sets. The City of Melbourne uses its
+                best endeavours to ensure that the information is reliable.</p>
+              <p>The building models are representational only and are not intended for analytical or comparative purposes.
+                The site content does not contain natural features such as the terrain. The building models are simplified
+                extrusions of the indicative floor plate for the podium (if relevant) and tower. The extrusion is an approximation
+                of the height of the building and does not show the architectural features of the buildings.</p>
+              <p>The information in the table below is provided to help users understand the currency and reliability of the
+                site content which often involves complex processes to derive the information. The aim is to provide users
+                with some facts about the source of the content and when it was collected. Users can then make an informed
+                decision as to whether the site content is appropriate for their particular purpose and information needs.</p>
+
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Content</th>
+                    <th>Source</th>
+                    <th>Currency</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th colspan="3">Model Information</th>
+                  </tr>
+
+                  <tr>
+                    <td>Applied (Blue)</td>
+                    <td>City of Melbourne planning and permits information system<br/>City of Melbourne Development Activity
+                      Monitor
+                    </td>
+                    <td>Maximum of two months old</td>
+                  </tr>
+
+                  <tr>
+                    <td>Approved (Green)</td>
+                    <td>City of Melbourne planning and permits information system<br/>City of Melbourne Development Activity
+                      Monitor
+                    </td>
+                    <td>Maximum of two months old</td>
+                  </tr>
+
+                  <tr>
+                    <td>Under Construction (Yellow)</td>
+                    <td>City of Melbourne planning and permits information system<br/>City of Melbourne Development Activity
+                      Monitor
+                    </td>
+                    <td>Maximum of two months old</td>
+                  </tr>
+
+                  <tr>
+                    <td>Current (Grey)</td>
+                    <td>Building footprints extruded by height of podium (where applicable) and tower</td>
+                    <td>May 2015: CBD, Southbank and Docklands<br/>Sept 2012: Other suburbs</td>
+                  </tr>
+
+                  <tr>
+                    <th colspan="3">Map</th>
+                  </tr>
+
+                  <tr>
+                    <td>Base map</td>
+                    <td>Open street map data served through the Mapbox platform</td>
+                    <td>Monthly (by third parties)</td>
+                  </tr>
+
+                </tbody>
+              </table>
+
+              <p>The City of Melbourne asserts copyright for City of Melbourne data and other material provided on this website.</p>
+              <p>Except for the base map provided by open street maps and any other content supplied by third parties on this
+                website, the City of Melbourne logo, and any material protected by a trade mark, the City of Melbourne has
+                applied the Creative Commons Attribution 3.0 Australia Licence to support and encourage the dissemination
+                and exchange of information.  The City of Melbourne asserts the right to be attributed as author of its original
+                material in the following manner:</p>
+              <p>© City of Melbourne 2017</p>
+              <p>As far as practicable, material for which the copyright is owned by a third party will be clearly labelled.
+                The City of Melbourne has made all reasonable efforts to ensure that this material has been reproduced on
+                this website with the full consent of the copyright owners.</p>
+              <p align="center">
+                <a rel="license" href="http://creativecommons.org/licenses/by/3.0/au/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/au/88x31.png"></a><br>
+                <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Dataset" property="dct:title" rel="dct:type">City of Melbourne Maps</span>                by <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.melbourne.vic.gov.au/" target="_blank" property="cc:attributionName"
+                  rel="cc:attributionURL">City of Melbourne</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/au/"
+                  target="_blank">Creative Commons Attribution 3.0 Australia License</a>.<br><br></p>
+            </section>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Accept</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <header>
+    <div class="com-strap">
+      <div class="container">
+        <div class="row hidden-lg">
+          <div class="col-xs-12">
+            <img class="horizontal-logo" src="com-mobilelogo.svg">
+          </div>
+        </div>
+
+        <div class="row visible-lg-block">
+          <div class="col-lg-2">
+            <img class="lg-logo" class="img-responsive" src="com-masterlogo.svg">
+          </div>
+          <div class="col-lg-10">
+            <h1 class="title title-on-com">Development Activity Model</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+    <div class="white-strap hidden-lg">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12">
+            <h1 class="title title-on-white">Development Activity Model</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="loader"></div>
+
+  <div class="map-container">
+    <div class="wand"></div>
+    <div id="map"></div>
+    <div class="status-container status-container-small btn-group-vertical hidden-sm hidden-md hidden-lg"></div>
+    <div class="status-container status-container-medium btn-group visible-sm-block visible-md-block visible-lg-block"></div>
+  </div>
+
+  <div class="hidden-xs hidden-sm hidden-md desktop-footer bg-grey9">
+    <div class="row">
+      <div class="col-lg-2 bg-grey9" style="text-align:right;">Contact City of Melbourne</div>
+      <div class="col-lg-2 bg-grey9">
+
+        <div class="col-glyph"><span class="glyphicon glyphicon-earphone"></span>
+          <div class="col-glyph-pad">+61 3 9658 9658</div>
+        </div>
+        <div class="col-glyph"><span class="glyphicon glyphicon-map-marker"></span>
+          <div class="col-glyph-pad">
+            <address>90-120 Swanston Street,<br>Melbourne VIC 3000</address>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-2 bg-grey9">
+        <div class="element">
+          <div>National relay service 133 677</div>
+          <div>(ask for 03 9658 9658)</div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 bg-grey9">
+        <div class="flexContent bg-grey9">
+          <div>
+            <a href="http://www.melbourne.vic.gov.au/pages/copyright.aspx" tabindex="0" target="_blank">Copyright @ 2017 City of Melbourne</a>
+          </div>
+          <br/>
+          <div>
+            <a href="http://www.melbourne.vic.gov.au/about-council/governance-transparency/policies-protocols/Pages/privacy.aspx" target="_blank"
+              tabindex="0">Privacy</a>
+            <span class="element">|</span>
+            <a href="http://www.melbourne.vic.gov.au/pages/site-map.aspx" target="_blank" tabindex="0">Site map</a>
+            <span class="element">|</span>
+            <a href="http://www.melbourne.vic.gov.au/pages/disclaimer.aspx" target="_blank" tabindex="0">Disclaimer</a>
+            <span class="element">|</span>
+            <a href="http://www.melbourne.vic.gov.au/Pages/social-media.aspx" target="_blank" tabindex="0">Social media</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-2 bg-grey9">
+        <a href="/" tabindex="0"><img src="Footer_CoM_Logo.png" alt="CoM Logo" style="height:50px"></a>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+
+</html>
