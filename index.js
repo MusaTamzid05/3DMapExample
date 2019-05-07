@@ -1,6 +1,5 @@
 
-
-console.log(buildingsLayerID);
+initApp();
 
 // Creates and returns the map.
 function initMap(views) {
@@ -35,42 +34,7 @@ function replaceHowToText() {
 
 }
 
-// Create our map
-app.map = initMap(app.views);
 
-// Once it's loaded...
-app.map.on("load", function () {
-    // Hide the spinner
-    $("#loader").hide();
-
-	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-		replaceHowToText();
-	}
-
-    // Add the navigation controls
-    app.map.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-    // Enable keyboard navigation
-    app.map.keyboard.enable();
-
-    // Add layer controls
-    app.map.addControl(new LayersControl(ObjectValues(app.filters)), "top-left");
-
-    // Add the actual layers to the map
-    addLayers(app.map, app.filters);
-
-    // Filter the layers (layers need to be added first to filter on them)
-    setFilter(app.map, ObjectValues(app.filters));
-
-    // Enable map interactions like hover/click
-    mapInteractions(app.map, app.filters);
-
-    // Add a drawer control that will hold other controls
-    app.map.addControl(new DrawerControl(app), "bottom-right");
-
-    // Open the disclaimer. Comment this out when developing so that it's not annoying
-    openDisclaimer();
-});
 
 // This is how a mapboxgl Control is defined: https://www.mapbox.com/mapbox-gl-js/api/#icontrol
 
