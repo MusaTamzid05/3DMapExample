@@ -22,3 +22,20 @@ function initMap(views) {
 
     return map;
 }
+
+
+function setFilter(map, filters) {
+    var baseFilter = ["in", "status"];
+    const filter = baseFilter.concat(gatherFilters(filters));
+    map.setFilter(buildingsLayerID, filter);
+}
+
+
+// Looks at the app.filters object and gets all the enabled filters
+function gatherFilters(filters) {
+    return filters.filter(function (filter) {
+        return filter.enabled;
+    }).map(function (filter) {
+        return filter.id;
+    });
+}
