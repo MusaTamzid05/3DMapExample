@@ -145,6 +145,9 @@ function addLayers(map, filters) {
 
 
 
+function degreeToRadian(degree) {
+    return degree * Math.PI / 180;
+}
 
 
 
@@ -399,4 +402,55 @@ function mapInteractions(map, filters) {
         // Return the most likely development key
         return mostVisibleFeatureDevelopmentKey;
     }
+}
+
+
+// This makes a geocoder control
+function createGeocoder(map) {
+    var geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        bbox: [144.89147186279297, -37.86130199456175, 145.01506805419922, -37.779398571318765]
+    });
+
+    // When the user selects a geocoder result
+    geocoder.on("result", function (e) {
+        var steps = 15;
+        var units = 'kilometers';
+
+        // NOTE(yuri): Both the base and the height of the "pin" are adjustable.
+        // Currently the base is set to 0, but you can play around with it.
+        // Note that a height of 20 and a base of 20 will render a flat object
+        // as the height is the absolute height, not an offset from the base.
+        var centerBase = turf.point(e.result.center, {
+            height: 20,
+            base: 0,
+        });
+        var radiusInner = 0.01;
+
+        var centerSpire = turf.point(e.result.center, {
+            height: 1000,
+            base: 0,
+        });
+        var radiusOuter = 0.001;
+
+        // Create 2 circles for our pin
+        var circleInner = turf.circle(centerBase, radiusInner, steps, units);
+        var circleOuter = turf.circle(centerSpire, radiusOuter, steps, units);
+
+        // Add them to the source data that is styled with extrusions
+        map.getSource("geocoder").setData(turf.featureCollection([circleInner, circleOuter]));
+    });
+
+    // Remove the pin data when the user clears the geocoder
+    geocoder.on("clear", function (e) {
+        map.getSource("geocoder").setData(turf.featureCollection([]));
+    });
+
+    return geocoder;
+}
+
+
+// Turf uses GeoJSON point representation, whereas Mapbox uses LngLats
+function lngLatToTurfPoint(point) {
+    return turf.point([point.lng, point.lat])
 }

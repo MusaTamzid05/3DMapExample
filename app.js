@@ -95,6 +95,9 @@ var app = {
     ]
 };
 
+function openDisclaimer() {
+    $("#myModal").modal();
+}
 
 function replaceHowToText() {
 
