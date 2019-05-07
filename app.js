@@ -131,7 +131,7 @@ function initApp() {
         app.map.addControl(new DrawerControl(app), "bottom-right");
 
         // Open the disclaimer. Comment this out when developing so that it's not annoying
-        openDisclaimer();
+        //openDisclaimer();
         console.log("App initialize");
     });
 }
