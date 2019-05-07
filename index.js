@@ -3,19 +3,8 @@ initApp();
 
 // Creates and returns the map.
 
-function replaceHowToText() {
-
-		var newHTML = $("#howto").html().replace(/Click on/g, 'Tap on')
-
-		$("#howto").html(newHTML);
-
-}
 
 
-
-// This is how a mapboxgl Control is defined: https://www.mapbox.com/mapbox-gl-js/api/#icontrol
-
-// First we create a constructor function that will add properties this control needs
 
 // This is another IControl. This one controls the views
 function ViewsControl(views, tour) {

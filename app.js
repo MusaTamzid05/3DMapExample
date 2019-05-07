@@ -95,6 +95,13 @@ var app = {
     ]
 };
 
+
+function replaceHowToText() {
+
+		var newHTML = $("#howto").html().replace(/Click on/g, 'Tap on');
+		$("#howto").html(newHTML);
+}
+
 function initApp() {
 
         // Create our map
